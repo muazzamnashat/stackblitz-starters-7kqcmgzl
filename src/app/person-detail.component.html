@@ -1,0 +1,91 @@
+<div class="app-shell detail-shell">
+  <header class="site-header">
+    <a class="brand" routerLink="/people" aria-label="Galactic Archive home">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span>GALACTIC<span class="brand-light">ARCHIVE</span></span>
+    </a>
+    <span class="header-tag">CHARACTER DOSSIER <span class="header-dot">◆</span> SWAPI DATA</span>
+  </header>
+
+  <main class="container detail-main">
+    <a class="back-link" routerLink="/people" [queryParams]="backQueryParams"><span aria-hidden="true">←</span> BACK TO ARCHIVE</a>
+
+    @if (loading()) {
+      <div class="state-panel detail-state" role="status"><span class="loading-ring"></span><h2>Opening dossier</h2><p>Loading this character’s record...</p></div>
+    } @else if (error()) {
+      <div class="state-panel detail-state" role="alert"><span class="state-symbol">!</span><h2>Character unavailable</h2><p>We couldn’t load this record. Check the link or try again.</p><button class="primary-button" type="button" (click)="retry()">Try again <span>↗</span></button></div>
+    } @else if (person(); as record) {
+      <section class="profile-hero" aria-labelledby="person-title">
+        <div class="profile-orbit"></div>
+        <div class="profile-avatar" aria-hidden="true"><span>{{ record.name.charAt(0) }}</span></div>
+        <div class="profile-intro">
+          <p class="section-kicker">THE ARCHIVE <span>—</span> CHARACTER DOSSIER</p>
+          <h1 id="person-title">{{ record.name }}</h1>
+          <p class="profile-subtitle">A character record from the Star Wars universe.</p>
+          <div class="profile-chips"><span>{{ displayValue(record.gender) }}</span><span>{{ displayValue(record.birth_year) }}</span><span>{{ record.films.length }} film{{ record.films.length === 1 ? '' : 's' }}</span></div>
+        </div>
+        <div class="profile-decoration" aria-hidden="true">✦</div>
+      </section>
+
+      <div class="detail-grid">
+        <div class="detail-primary">
+          <section class="info-section" aria-labelledby="about-title">
+            <div class="detail-section-head"><span class="section-number">01</span><h2 id="about-title">At a glance</h2></div>
+            <dl class="facts-grid">
+              <div><dt>Birth year</dt><dd>{{ displayValue(record.birth_year) }}</dd></div>
+              <div><dt>Gender</dt><dd>{{ displayValue(record.gender) }}</dd></div>
+              <div><dt>Height</dt><dd>{{ displayValue(record.height) }} @if (record.height !== 'unknown' && record.height !== 'n/a') { <span class="unit">cm</span> }</dd></div>
+              <div><dt>Mass</dt><dd>{{ displayValue(record.mass) }} @if (record.mass !== 'unknown' && record.mass !== 'n/a') { <span class="unit">kg</span> }</dd></div>
+              <div><dt>Hair color</dt><dd>{{ displayValue(record.hair_color) }}</dd></div>
+              <div><dt>Eye color</dt><dd>{{ displayValue(record.eye_color) }}</dd></div>
+              <div><dt>Skin color</dt><dd>{{ displayValue(record.skin_color) }}</dd></div>
+            </dl>
+          </section>
+
+          <section class="info-section" aria-labelledby="films-title">
+            <div class="detail-section-head"><span class="section-number">02</span><h2 id="films-title">Film appearances</h2><span class="section-count">{{ record.films.length }} TOTAL</span></div>
+            @if (relatedLoading()) { <p class="related-loading">Loading film titles...</p> }
+            @else if (related().films.length) {
+              <div class="related-list">
+                @for (film of related().films; track film.url; let index = $index) {
+                  <a class="related-row" [href]="film.url" target="_blank" rel="noopener noreferrer"><span class="related-index">{{ (index + 1).toString().padStart(2, '0') }}</span><span class="related-name">{{ film.label }}<small>{{ film.detail }}</small></span><span class="related-arrow" aria-hidden="true">↗</span></a>
+                }
+              </div>
+            } @else { <p class="empty-relationship">No films recorded.</p> }
+          </section>
+
+          <section class="info-section" aria-labelledby="craft-title">
+            <div class="detail-section-head"><span class="section-number">03</span><h2 id="craft-title">Vehicles & starships</h2></div>
+            <div class="craft-grid">
+              <div class="craft-panel"><h3>Starships <span>{{ record.starships.length }}</span></h3>
+                @if (relatedLoading()) { <p class="related-loading">Loading...</p> }
+                @else if (related().starships.length) { @for (item of related().starships; track item.url) { <a [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.label }} <span aria-hidden="true">↗</span></a> } }
+                @else { <p class="empty-relationship">None recorded</p> }
+              </div>
+              <div class="craft-panel"><h3>Vehicles <span>{{ record.vehicles.length }}</span></h3>
+                @if (relatedLoading()) { <p class="related-loading">Loading...</p> }
+                @else if (related().vehicles.length) { @for (item of related().vehicles; track item.url) { <a [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.label }} <span aria-hidden="true">↗</span></a> } }
+                @else { <p class="empty-relationship">None recorded</p> }
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="detail-sidebar" aria-label="Origin and record details">
+          <div class="sidebar-card"><span class="sidebar-icon" aria-hidden="true">◎</span><p class="sidebar-label">HOMEWORLD</p>
+            @if (relatedLoading()) { <h3>Loading...</h3> }
+            @else if (related().homeworld.length) { <h3>{{ related().homeworld[0].label }}</h3><a [href]="related().homeworld[0].url" target="_blank" rel="noopener noreferrer">EXPLORE PLANET ↗</a> }
+            @else { <h3>Unknown</h3> }
+          </div>
+          <div class="sidebar-card species-card"><span class="sidebar-icon" aria-hidden="true">✧</span><p class="sidebar-label">SPECIES</p>
+            @if (relatedLoading()) { <h3>Loading...</h3> }
+            @else if (related().species.length) { @for (item of related().species; track item.url) { <h3>{{ item.label }}</h3><a [href]="item.url" target="_blank" rel="noopener noreferrer">VIEW SPECIES ↗</a> } }
+            @else { <h3>Not recorded</h3> }
+          </div>
+          <div class="record-card"><p>RECORD INFORMATION</p><dl><div><dt>Added</dt><dd>{{ record.created | date:'MMM d, y' }}</dd></div><div><dt>Updated</dt><dd>{{ record.edited | date:'MMM d, y' }}</dd></div></dl><a [href]="record.url" target="_blank" rel="noopener noreferrer">VIEW API RECORD <span>↗</span></a></div>
+        </aside>
+      </div>
+    }
+  </main>
+  <footer class="site-footer"><span>✦ GALACTIC ARCHIVE</span><span>POWERED BY <a href="https://swapi.py4e.com/" target="_blank" rel="noopener noreferrer">SWAPI</a></span></footer>
+</div>

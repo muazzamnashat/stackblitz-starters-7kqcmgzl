@@ -1,0 +1,100 @@
+<div class="app-shell">
+  <header class="site-header">
+    <a class="brand" routerLink="/people" aria-label="Galactic Archive home">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span>GALACTIC<span class="brand-light">ARCHIVE</span></span>
+    </a>
+    <span class="header-tag">THE PEOPLE INDEX <span class="header-dot">◆</span> SWAPI DATA</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-orbit hero-orbit-one"></div>
+      <div class="hero-orbit hero-orbit-two"></div>
+      <div class="hero-content">
+        <div class="eyebrow"><span class="tiny-line"></span> EXPLORE THE GALAXY</div>
+        <h1>Every story starts<br />with a <em>character.</em></h1>
+        <p>Browse the people who shaped a galaxy far, far away. Search the archive, narrow your view, and discover their stories.</p>
+        <div class="hero-meta">
+          <span><strong>{{ people().length || '—' }}</strong> characters catalogued</span>
+          <span class="meta-divider"></span>
+          <span>Across the Star Wars universe</span>
+        </div>
+      </div>
+      <div class="hero-emblem" aria-hidden="true"><span>✦</span></div>
+      <div class="hero-index" aria-hidden="true">01 / THE ARCHIVE</div>
+    </section>
+
+    <section class="catalog container" aria-labelledby="catalog-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">THE DIRECTORY <span>—</span> 001</p>
+          <h2 id="catalog-title">Character archive</h2>
+        </div>
+        <p class="section-description">A growing record of beings from across the galaxy.</p>
+      </div>
+
+      <div class="toolbar">
+        <label class="search-field">
+          <span class="field-icon" aria-hidden="true">⌕</span>
+          <span class="sr-only">Search characters by name</span>
+          <input type="search" placeholder="Search by name..." [ngModel]="search()" (ngModelChange)="setSearch($event)" autocomplete="off" />
+        </label>
+        <label class="filter-field">
+          <span class="filter-caption">FILTER BY</span>
+          <span class="sr-only">Gender</span>
+          <select [ngModel]="gender()" (ngModelChange)="setGender($event)">
+            <option value="all">All genders</option>
+            @for (option of genders(); track option) {
+              <option [value]="option">{{ displayValue(option) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="results-line" aria-live="polite">
+        <span>@if (!loading() && !error()) { SHOWING <strong>{{ firstResult() }}–{{ lastResult() }}</strong> OF <strong>{{ filteredPeople().length }}</strong> CHARACTERS } @else { CHARACTER RECORDS }</span>
+        <span class="results-line-rule"></span>
+        @if (search() || gender() !== 'all') {
+          <button class="text-button" type="button" (click)="clearFilters()">CLEAR FILTERS <span aria-hidden="true">×</span></button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="state-panel" role="status"><span class="loading-ring"></span><h3>Loading the archive</h3><p>Gathering character records from across the galaxy...</p></div>
+      } @else if (error()) {
+        <div class="state-panel" role="alert"><span class="state-symbol">!</span><h3>Couldn’t load the archive</h3><p>Check your connection and try again.</p><button class="primary-button" type="button" (click)="loadPeople()">Try again <span>↗</span></button></div>
+      } @else if (!filteredPeople().length) {
+        <div class="state-panel"><span class="state-symbol">⌕</span><h3>No characters found</h3><p>Try a different name or change the filter.</p><button class="primary-button" type="button" (click)="clearFilters()">Clear filters <span>↗</span></button></div>
+      } @else {
+        <div class="character-grid">
+          @for (person of visiblePeople(); track person.url) {
+            <a class="character-card" [routerLink]="['/people', personId(person)]" [queryParams]="detailQueryParams()" [attr.aria-label]="'View details for ' + person.name">
+              <div class="card-topline"><span>ARCHIVE / {{ personId(person).padStart(3, '0') }}</span><span class="card-star">✦</span></div>
+              <div class="avatar" aria-hidden="true"><span>{{ person.name.charAt(0) }}</span><span class="avatar-orbit"></span></div>
+              <div class="card-content">
+                <span class="card-overline">CHARACTER PROFILE</span>
+                <h3>{{ person.name }}</h3>
+                <div class="card-facts"><span>{{ displayValue(person.gender) }}</span><span class="fact-dot"></span><span>{{ displayValue(person.birth_year) }}</span></div>
+              </div>
+              <div class="card-footer"><span>VIEW PROFILE</span><span class="card-arrow" aria-hidden="true">↗</span></div>
+            </a>
+          }
+        </div>
+
+        <nav class="pagination" aria-label="Character pages">
+          <span class="pagination-info">PAGE {{ currentPage().toString().padStart(2, '0') }} <span>/</span> {{ totalPages().toString().padStart(2, '0') }}</span>
+          <div class="pagination-controls">
+            <button type="button" class="page-arrow" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" aria-label="Previous page">←</button>
+            @for (pageNumber of pageNumbers(); track pageNumber) {
+              <button type="button" class="page-number" [class.active]="pageNumber === currentPage()" [attr.aria-current]="pageNumber === currentPage() ? 'page' : null" (click)="goToPage(pageNumber)">{{ pageNumber }}</button>
+            }
+            <button type="button" class="page-arrow" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" aria-label="Next page">→</button>
+          </div>
+        </nav>
+      }
+    </section>
+  </main>
+
+  <footer class="site-footer"><span>✦ GALACTIC ARCHIVE</span><span>POWERED BY <a href="https://swapi.py4e.com/" target="_blank" rel="noopener noreferrer">SWAPI</a></span></footer>
+</div>

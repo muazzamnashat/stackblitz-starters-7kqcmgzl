@@ -1,21 +1,26 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter, RouterOutlet } from '@angular/router';
+import { PeopleListComponent } from './app/people-list.component';
+import { PersonDetailComponent } from './app/person-detail.component';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <h1>Hello from {{ name }}!</h1>
-    <a target="_blank" href="https://angular.dev/overview">
-      Learn more about Angular
-    </a>
-    <button (click)="counter.set(counter() - 1)">--</button>
-    <span> Counter: {{ counter() }} </span>
-    <button (click)="counter.set(counter() + 1)">++</button>
-  `,
+  standalone: true,
+  imports: [RouterOutlet],
+  template: '<router-outlet />',
 })
-export class App {
-  name = 'Angular';
-  counter = signal(0);
-}
+class App {}
 
-bootstrapApplication(App);
+bootstrapApplication(App, {
+  providers: [
+    provideHttpClient(),
+    provideRouter([
+      { path: '', pathMatch: 'full', redirectTo: 'people' },
+      { path: 'people', component: PeopleListComponent, title: 'Characters · Galactic Archive' },
+      { path: 'people/:id', component: PersonDetailComponent, title: 'Character · Galactic Archive' },
+      { path: '**', redirectTo: 'people' },
+    ]),
+  ],
+}).catch(console.error);
