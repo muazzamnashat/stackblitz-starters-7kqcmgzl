@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, RouterOutlet } from '@angular/router';
 import { PeopleListComponent } from './app/people-list.component';
 import { PersonDetailComponent } from './app/person-detail.component';
+import { testInterceptor } from './test.interceptor';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ class App {}
 
 bootstrapApplication(App, {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptor([testInterceptor])),
     provideRouter([
       { path: '', pathMatch: 'full', redirectTo: 'people' },
       { path: 'people', component: PeopleListComponent, title: 'Characters · Galactic Archive' },
